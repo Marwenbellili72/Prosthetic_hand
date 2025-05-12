@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconnaissance de Mouvements EMG avec Visualisation 3D</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f2f5, #ffffff);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        .upload-section,
+        .results-section {
+            flex: 1;
+            min-width: 300px;
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .upload-section:hover,
+        .results-section:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .visualization-section {
+            flex: 2;
+            min-width: 400px;
+            height: 600px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #visualizationContainer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        #fileInput {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d2d6dc;
+            border-radius: 6px;
+            background: #fff;
+            transition: border-color 0.2s ease;
+        }
+
+        #fileInput:focus {
+            border-color: #3182ce;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+
+        button {
+            background: linear-gradient(90deg, #3182ce, #63b3ed);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #2b6cb0, #4299e1);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .small-button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            align-items: center;
+        }
+
+        .status-message {
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            text-align: center;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-loading {
+            background: #f6e05e;
+            color: #744210;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #9b2c2c;
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 6px;
+            border-left: 4px solid #3182ce;
+            transition: background 0.2s ease;
+        }
+
+        .result-item:hover {
+            background: #e2e8f0;
+        }
+
+        .movement-name {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .movements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .movements-title {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .movement-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .movement-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .movement-list li {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .movement-list li:hover {
+            background: #f7fafc;
+            transform: translateX(3px);
+        }
+
+        .movement-list li.selected {
+            background: #3182ce;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(49, 130, 206, 0.3);
+        }
+
+        .movement-list li.selected .movement-count {
+            background: #2b6cb0;
+            color: #fff;
+        }
+
+        .movement-count {
+            background: #e2e8f0;
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #4a5568;
+        }
+
+        .loading-spinner {
+            border: 5px solid #edf2f7;
+            border-top: 5px solid #3182ce;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .flex-container {
+                gap: 20px;
+            }
+
+            .upload-section,
+            .results-section,
+            .visualization-section {
+                min-width: 100%;
+            }
+
+            .visualization-section {
+                height: 400px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reconnaissance de Mouvements EMG avec Visualisation 3D</h1>
+
+        <div class="flex-container">
+            <div class="upload-section">
+                <h2>Upload de Signal EMG</h2>
+                <div class="input-group">
+                    <label for="fileInput">Fichier .mat contenant les données EMG:</label>
+                    <input type="file" id="fileInput" accept=".mat" />
+                </div>
+                <div style="text-align: center; padding-bottom: 20px;">
+                <button id="predictButton" disabled >Prédire et Visualiser</button>
+                </div>
+                <div id="statusMessage" class="status-message" style="display: none;"></div>
+                <div id="resultsContainer">
+                    <p>Aucun résultat disponible. Veuillez téléverser un fichier .mat et cliquer sur "Prédire et Visualiser".</p>
+                </div>
+            </div>
+
+            <div class="visualization-section">
+                <h2 style="text-align: center;">Visualisation 3D</h2>
+                <div id="visualizationContainer">
+                    <div id="loadingModel" class="loading-indicator">
+                        <div class="loading-spinner"></div>
+                        <p>Chargement du modèle 3D...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>Mouvements Détectés</h2>
+                <div id="movementsListContainer" style="display: none;">
+                    <div class="movements-header">
+                        <div class="movement-controls" style="text-align: center;">
+                            <button id="playAllButton" class="small-button" disabled>▶ Tout jouer</button>
+                            <button id="stopAnimationButton" class="small-button" disabled>■ Arrêter</button>
+                        </div>
+                    </div>
+                    <ul id="movementsList" class="movement-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls, handModel, animationMixer;
+        let clock = new THREE.Clock();
+        let isHandModelLoaded = false;
+        let loadedAnimations = {};
+        let currentAnimationClip = null;
+
+        let allPredictedMovements = [];
+        let isPlayingAllMovements = false;
+        let playAllTimeout = null;
+        let currentPlayingIndex = -1;
+
+        const fileInput = document.getElementById('fileInput');
+        const predictButton = document.getElementById('predictButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const visualizationContainer = document.getElementById('visualizationContainer');
+        const loadingModelIndicator = document.getElementById('loadingModel');
+        const movementsListContainer = document.getElementById('movementsListContainer');
+        const movementsList = document.getElementById('movementsList');
+        const playAllButton = document.getElementById('playAllButton');
+        const stopAnimationButton = document.getElementById('stopAnimationButton');
+
+        const movementNames = {
+            0: "Repos",
+            1: "Flexion de l’index",
+            2: "Abduction du pouce",
+            3: "Adduction du pouce",
+            4: "Flexion du pouce",
+            5: "Flexion du majeur",
+            6: "Extension de l’index",
+            7: "Extension du majeur",
+            8: "Flexion de l’annulaire",
+            9: "Extension de l’annulaire",
+            10: "Flexion de l’auriculaire",
+            11: "Extension de l’auriculaire",
+            12: "Extension du pouce"
+        };
+
+        const movementToAnimationMap = {
+            0: 0,
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 5,
+            6: 6,
+            7: 7,
+            8: 8,
+            9: 9,
+            10: 10,
+            11: 11,
+            12: 12
+        };
+
+        window.addEventListener('load', initThreeJS);
+        fileInput.addEventListener('change', handleFileSelect);
+        predictButton.addEventListener('click', handlePredictClick);
+        playAllButton.addEventListener('click', playAllMovements);
+        stopAnimationButton.addEventListener('click', stopAllAnimations);
+
+        function handleFileSelect() {
+            const hasFile = fileInput.files.length > 0;
+            let isValid = false;
+            if (hasFile) {
+                const fileName = fileInput.files[0].name;
+                if (fileName.toLowerCase().endsWith('.mat')) {
+                    isValid = true;
+                    showStatus('', 'none');
+                } else {
+                    showStatus('Veuillez sélectionner un fichier .mat valide.', 'error');
+                }
+            }
+            predictButton.disabled = !isValid;
+        }
+
+        async function handlePredictClick() {
+            if (!fileInput.files.length || predictButton.disabled) return;
+
+            const file = fileInput.files[0];
+            predictButton.disabled = true;
+            playAllButton.disabled = true;
+            stopAnimationButton.disabled = true;
+            showStatus('Envoi du fichier et traitement en cours...', 'loading');
+            resetResults();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/predict/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorText = errorJson.error || errorText;
+                    } catch(e) {}
+                    throw new Error(`Erreur ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                processResults(data);
+                showStatus('Prédiction réussie!', 'success');
+                playAllButton.disabled = !allPredictedMovements.length;
+                stopAnimationButton.disabled = false;
+
+            } catch (error) {
+                console.error('Erreur lors de la prédiction:', error);
+                showStatus(`Erreur: ${error.message}`, 'error');
+                resetResults();
+            } finally {
+                handleFileSelect();
+            }
+        }
+
+        function showStatus(message, type) {
+            if (type === 'none') {
+                statusMessage.style.display = 'none';
+                return;
+            }
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            statusMessage.classList.add(`status-${type}`);
+            statusMessage.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (statusMessage.classList.contains('status-success')) {
+                        statusMessage.style.display = 'none';
+                    }
+                }, 5000);
+            }
+        }
+
+        function resetResults() {
+            resultsContainer.innerHTML = '<p>Aucun résultat disponible. Veuillez téléverser un fichier .mat et cliquer sur "Prédire et Visualiser".</p>';
+            movementsList.innerHTML = '';
+            movementsListContainer.style.display = 'none';
+            allPredictedMovements = [];
+            stopAllAnimations();
+            setHandPose(0);
+            playAllButton.disabled = true;
+            stopAnimationButton.disabled = true;
+        }
+
+        function processResults(data) {
+            resultsContainer.innerHTML = '';
+
+            allPredictedMovements = data.predicted_movements_sequence || [];
+
+            if (!allPredictedMovements.length) {
+                resultsContainer.innerHTML = '<p>Aucun mouvement n\'a été prédit à partir de ce fichier.</p>';
+                movementsListContainer.style.display = 'none';
+                setHandPose(0);
+                return;
+            }
+
+            const movementCounts = {};
+            allPredictedMovements.forEach(movement => {
+                movementCounts[movement] = (movementCounts[movement] || 0) + 1;
+            });
+
+            const majorityMovement = data.majority_predicted_movement;
+            const majorityMovementName = movementNames[majorityMovement] || `Mouvement Inconnu ${majorityMovement}`;
+
+
+            const infoElement = document.createElement('div');
+            infoElement.className = 'result-item';
+            infoElement.innerHTML = `
+                <h3>Informations</h3>
+                <p>Fichier traité: ${data.filename || 'N/A'}</p>
+                <p>Nombre de fenêtres analysées: ${data.num_windows_processed || 'N/A'}</p>
+                <p>Total mouvements détectés: ${allPredictedMovements.length}</p>
+            `;
+            resultsContainer.appendChild(infoElement);
+
+            movementsListContainer.style.display = 'block';
+            movementsList.innerHTML = '';
+
+            const sortedMovements = Object.entries(movementCounts)
+                .map(([idStr, count]) => ({
+                    id: parseInt(idStr),
+                    count: count,
+                    percentage: Math.round((count / allPredictedMovements.length) * 100)
+                }))
+                .sort((a, b) => b.count - a.count);
+
+            sortedMovements.forEach(movement => {
+                const li = document.createElement('li');
+                li.dataset.movementId = movement.id;
+                const name = movementNames[movement.id] || `Mouvement ${movement.id}`;
+                li.innerHTML = `
+                    <span>${name}</span>
+                    <span class="movement-count">${movement.count} (${movement.percentage}%)</span>
+                `;
+
+                if (movement.id === majorityMovement) {
+                    li.classList.add('selected');
+                }
+
+                li.addEventListener('click', () => {
+                    if (isPlayingAllMovements) {
+                        stopAllAnimations();
+                    }
+                    selectMovementInList(movement.id);
+                    setHandPose(movement.id);
+                });
+
+                movementsList.appendChild(li);
+            });
+
+            setHandPose(majorityMovement);
+            playAllButton.disabled = false;
+            stopAnimationButton.disabled = false;
+        }
+
+        function selectMovementInList(movementId) {
+            document.querySelectorAll('#movementsList li').forEach(item => {
+                item.classList.remove('selected');
+                if (parseInt(item.dataset.movementId) === movementId) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+
+        function playAllMovements() {
+            if (isPlayingAllMovements || !allPredictedMovements.length) return;
+
+            console.log("Démarrage de la lecture séquentielle...");
+            isPlayingAllMovements = true;
+            playAllButton.disabled = true;
+            stopAnimationButton.disabled = false;
+            currentPlayingIndex = 0;
+            const durationPerMovement = 1000;
+
+            function playNext() {
+                if (!isPlayingAllMovements || currentPlayingIndex >= allPredictedMovements.length) {
+                    console.log("Lecture séquentielle terminée ou arrêtée.");
+                    stopAllAnimations();
+                    return;
+                }
+
+                const movementId = allPredictedMovements[currentPlayingIndex];
+                console.log(`Lecture index ${currentPlayingIndex}, Mouvement: ${movementId}`);
+
+                selectMovementInList(movementId);
+                setHandPose(movementId);
+
+                currentPlayingIndex++;
+                playAllTimeout = setTimeout(playNext, durationPerMovement);
+            }
+
+            playNext();
+        }
+
+        function stopAllAnimations() {
+            console.log("Arrêt de l'animation / lecture.");
+            isPlayingAllMovements = false;
+            if (playAllTimeout) {
+                clearTimeout(playAllTimeout);
+                playAllTimeout = null;
+            }
+
+            playAllButton.disabled = !allPredictedMovements.length;
+            stopAnimationButton.disabled = true;
+            currentPlayingIndex = -1;
+        }
+
+        function initThreeJS() {
+            console.log("Initialisation de Three.js...");
+            const container = visualizationContainer;
+            if (!container) {
+                console.error("Conteneur de visualisation introuvable!");
+                return;
+            }
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xeeeeee);
+
+            const aspectRatio = container.clientWidth / container.clientHeight;
+            camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1000);
+            camera.position.set(0, 2, 6); // Ajusté pour modèle plus grand
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 1.2, 0); 
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+            controls.update();
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 50;
+            scene.add(directionalLight);
+
+            const planeGeometry = new THREE.PlaneGeometry(10, 10);
+            const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.3 });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = 0;
+            plane.receiveShadow = true;
+            scene.add(plane);
+
+            loadHandModel();
+
+            window.addEventListener('resize', onWindowResize);
+
+            animate();
+            console.log("Three.js initialisé.");
+        }
+
+        function loadHandModel() {
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                '/static/models/hand_model.glb',
+                (gltf) => {
+                    console.log('Modèle 3D chargé:', gltf);
+                    handModel = gltf.scene;
+
+                    handModel.scale.set(20.0, 20.0, 20.0); 
+                    handModel.position.set(0, 3, 0);
+                    handModel.traverse(function (node) {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                    });
+
+                    scene.add(handModel);
+                    controls.target.set(0, handModel.position.y + 1.2, 0);
+                    controls.update();
+
+                    animationMixer = new THREE.AnimationMixer(handModel);
+                    loadedAnimations = {};
+
+                    if (gltf.animations && gltf.animations.length > 0) {
+                        console.log(`Trouvé ${gltf.animations.length} animations dans le modèle.`);
+                        gltf.animations.forEach((clip, index) => {
+                            const action = animationMixer.clipAction(clip);
+                            action.setLoop(THREE.LoopOnce);
+                            action.clampWhenFinished = true;
+                            loadedAnimations[index] = action;
+                            console.log(`  -> Animation ${index}: ${clip.name || 'Sans nom'} (${clip.duration.toFixed(2)}s)`);
+                        });
+                    } else {
+                        console.warn('Aucune animation trouvée dans le modèle GLB.');
+                    }
+
+                    isHandModelLoaded = true;
+                    loadingModelIndicator.style.display = 'none';
+                    console.log("Modèle chargé et animations préparées.");
+
+                    setHandPose(0);
+                },
+                (xhr) => {
+                    const percentComplete = Math.round((xhr.loaded / xhr.total) * 100);
+                    loadingModelIndicator.querySelector('p').textContent = `Chargement du modèle 3D: ${percentComplete}%`;
+                },
+                (error) => {
+                    console.error('Erreur lors du chargement du modèle 3D:', error);
+                    loadingModelIndicator.innerHTML = `
+                        <p style="color: red; font-weight: bold;">Erreur chargement modèle!</p>
+                        <p style="font-size: 12px;">Vérifiez chemin/fichier et console.</p>
+                        <pre style="font-size: 10px; text-align: left; max-height: 50px; overflow: auto;">${error.message || error}</pre>
+                    `;
+                    isHandModelLoaded = false;
+                }
+            );
+        }
+
+        function setHandPose(predictedMovementIndex) {
+            if (!isHandModelLoaded || !animationMixer) {
+                console.warn('Tentative de définir la pose avant le chargement du modèle ou du mixer.');
+                return;
+            }
+
+            const movementName = movementNames[predictedMovementIndex] || `Inconnu (${predictedMovementIndex})`;
+            console.log(`Définition de la pose pour Mouvement: ${predictedMovementIndex} (${movementName})`);
+
+            const targetAnimationIndex = movementToAnimationMap[predictedMovementIndex];
+            console.log(`  -> Mouvement ${predictedMovementIndex} mappé à l'index d'animation GLB: ${targetAnimationIndex}`);
+
+            let animationToPlay = loadedAnimations[targetAnimationIndex];
+
+            if (animationToPlay === undefined) {
+                console.warn(`  !! Animation GLB[${targetAnimationIndex}] non trouvée pour le mouvement ${predictedMovementIndex}.`);
+                if (targetAnimationIndex !== 0 && loadedAnimations[0]) {
+                    console.log("  -> Utilisation de l'animation de fallback: GLB[0] (Repos)");
+                    animationToPlay = loadedAnimations[0];
+                } else {
+                    console.error("  !! Animation de Repos (index 0) introuvable!");
+                    stopCurrentAnimationClip();
+                    currentAnimationClip = null;
+                    return;
+                }
+            }
+
+            if (currentAnimationClip && currentAnimationClip !== animationToPlay) {
+                console.log(`  -> Arrêt de l'animation précédente: ${currentAnimationClip.getClip().name || 'Sans nom'}`);
+                currentAnimationClip.fadeOut(0.1);
+            } else if (currentAnimationClip && currentAnimationClip === animationToPlay) {
+                console.log(`  -> L'animation demandée est déjà active ou en cours. Réinitialisation.`);
+                currentAnimationClip.stop();
+            }
+
+            console.log(`  -> Lecture de l'animation: ${animationToPlay.getClip().name || 'Sans nom'} (Index GLB: ${targetAnimationIndex})`);
+            animationToPlay.reset();
+            animationToPlay.setEffectiveWeight(1.0);
+            animationToPlay.fadeIn(0.1);
+            animationToPlay.play();
+
+            currentAnimationClip = animationToPlay;
+        }
+
+        function stopCurrentAnimationClip() {
+            if (currentAnimationClip) {
+                console.log(`Arrêt de l'animation clip: ${currentAnimationClip.getClip().name || 'Sans nom'}`);
+                currentAnimationClip.stop();
+            }
+        }
+
+        function onWindowResize() {
+            const container = visualizationContainer;
+            if (!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            if (width === 0 || height === 0) return;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            console.log("Fenêtre redimensionnée");
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+
+            controls.update();
+
+            if (animationMixer) {
+                animationMixer.update(delta);
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
