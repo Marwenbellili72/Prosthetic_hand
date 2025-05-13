@@ -133,9 +133,8 @@ The full project is **Dockerized** to simplify deployment and ensure reproducibi
 The application is deployed on **Hugging Face Spaces**, offering a browser-accessible environment to test the prosthetic hand system without installation.
 
 <p align="center">
-  <img src="assets/img6.png" alt="3D Visualization Preview" />
+  <img src="assets/img6.png" alt="Architecture" />
 </p>
----
 
 ## 🖼️ Live Preview
 
