@@ -150,7 +150,6 @@ You can **upload your own EMG data file** (preprocessed to match Exercise 1 stru
   <img src="assets/img5.png" width="500px" alt="Architecture" />
 </p>
 
----
 
 ## 📦 Installation (Local)
 
