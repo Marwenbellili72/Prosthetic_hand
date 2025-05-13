@@ -100,9 +100,13 @@ It contains:
 The notebook also includes:
 
 * 📊 A confusion matrix plot to analyze classification results
-  ![confusion](https://github.com/Marwenbellili72/Prosthetic_hand/blob/main/assets/img1.png)
+ <p align="center">
+  <img src="assets/img1.png" width="500px" alt="3D Visualization Preview" />
+ </p>
 * 📉 Metrics such as accuracy, precision, recall, and F1-score
-  ![confusion](https://github.com/Marwenbellili72/Prosthetic_hand/blob/main/assets/img2.png)
+  <p align="center">
+  <img src="assets/img2.png" width="500px" alt="3D Visualization Preview" />
+  </p>
 * 📌 Step-by-step code for reproducibility and understanding of the training process
   
 🔍 To view the training code and see how the model was built and evaluated, please check the .ipynb file directly.
