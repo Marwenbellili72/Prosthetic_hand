@@ -139,7 +139,7 @@ The application is deployed on **Hugging Face Spaces**, offering a browser-acces
 ## 🖼️ Live Preview
 
 <p align="center">
-  <img src="static/preview.gif" width="500px" alt="3D Visualization Preview" />
+  <img src="assets/img1" width="500px" alt="3D Visualization Preview" />
 </p>
 
 ---
