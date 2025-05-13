@@ -1,4 +1,3 @@
-````markdown
 # 🦾 Prosthetic Hand – Intelligent Myoelectric Control System
 
 An advanced myoelectric prosthetic hand project that leverages machine learning (XGBoost), EMG signal processing, 3D real-time visualization, and web deployment.
