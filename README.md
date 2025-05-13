@@ -73,21 +73,6 @@ We only used **Exercise 1** from NinaPro DB1, which focuses on **individual fing
 
 ---
 
-## 🧪 Try it Yourself (on Hugging Face)
-
-You can **upload your own EMG data file** (preprocessed to match Exercise 1 structure) directly through the web interface on **Hugging Face Spaces**, and the system will:
-
-1. Process the signal  
-2. Predict the gesture  
-3. Show the animation in real time  
-
-> 🔗 [Hugging Face Space Demo](https://huggingface.co/spaces/Marwenbellili72/Prosthetic_hand)
-<p align="center">
-  <img src="assets/img5.png" width="500px" alt="3D Visualization Preview" />
-</p>
-
----
-
 ## 📈 Model Performance
 
 To evaluate the model's accuracy and performance, refer to the included **Jupyter Notebook** file:
@@ -151,8 +136,15 @@ The application is deployed on **Hugging Face Spaces**, offering a browser-acces
 
 ## 🖼️ Live Preview
 
+You can **upload your own EMG data file** (preprocessed to match Exercise 1 structure) directly through the web interface on **Hugging Face Spaces**, and the system will:
+
+1. Process the signal  
+2. Predict the gesture  
+3. Show the animation in real time  
+
+> 🔗 [Hugging Face Space Demo](https://huggingface.co/spaces/Marwenbellili72/Prosthetic_hand)
 <p align="center">
-  <img src="assets/img1.png" width="500px" alt="3D Visualization Preview" />
+  <img src="assets/img5.png" width="500px" alt="3D Visualization Preview" />
 </p>
 
 ---
@@ -196,24 +188,3 @@ uvicorn main_api:app --reload
 
 ---
 
-## 🗂️ Project Structure
-
-```
-Prosthetic_hand/
-├── main_api.py
-├── emg_xgboost_model.json
-├── emg_scaler.pkl
-├── notebooks/
-│   └── model_training_and_evaluation.ipynb
-├── static/
-│   ├── models/
-│   │   └── hand_model.glb
-│   ├── js/
-│   │   └── viewer.js
-│   └── preview.gif
-├── templates/
-│   └── index.html
-├── requirements.txt
-├── Dockerfile
-├── README.md
-```
