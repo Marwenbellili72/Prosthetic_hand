@@ -132,6 +132,9 @@ The full project is **Dockerized** to simplify deployment and ensure reproducibi
 
 The application is deployed on **Hugging Face Spaces**, offering a browser-accessible environment to test the prosthetic hand system without installation.
 
+<p align="center">
+  <img src="assets/img6.png" alt="3D Visualization Preview" />
+</p>
 ---
 
 ## 🖼️ Live Preview
@@ -144,7 +147,7 @@ You can **upload your own EMG data file** (preprocessed to match Exercise 1 stru
 
 > 🔗 [Hugging Face Space Demo](https://huggingface.co/spaces/Marwenbellili72/Prosthetic_hand)
 <p align="center">
-  <img src="assets/img5.png" width="500px" alt="3D Visualization Preview" />
+  <img src="assets/img5.png" width="500px" alt="Architecture" />
 </p>
 
 ---
