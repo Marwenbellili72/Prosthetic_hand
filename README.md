@@ -63,6 +63,9 @@ We developed an intelligent prosthetic hand system featuring:
 ## 📊 Dataset
 
 The model was trained using the [**NinaPro Database 1 (DB1)**](https://ninapro.hevs.ch/instructions/DB1.html), which contains high-quality EMG signals from multiple subjects performing various hand gestures.
+<p align="center">
+  <img src="assets/img4.png" width="500px" alt="3D Visualization Preview" />
+</p>
 
 ### 🔍 Selected Data
 
@@ -79,6 +82,9 @@ You can **upload your own EMG data file** (preprocessed to match Exercise 1 stru
 3. Show the animation in real time  
 
 > 🔗 [Hugging Face Space Demo](https://huggingface.co/spaces/Marwenbellili72/Prosthetic_hand)
+<p align="center">
+  <img src="assets/img5.png" width="500px" alt="3D Visualization Preview" />
+</p>
 
 ---
 
@@ -118,6 +124,9 @@ The notebook also includes:
 ### 🎨 Animation with Blender
 
 We created a realistic 3D hand model in **Blender** by adding **armatures** (bones) and designing movement animations corresponding to each gesture. These animations were exported and dynamically controlled via code.
+<p align="center">
+  <img src="assets/img3.png" width="500px" alt="3D Visualization Preview" />
+</p>
 
 ### 🌍 Real-time Visualization with Three.js
 
