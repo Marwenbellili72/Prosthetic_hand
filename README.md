@@ -96,6 +96,14 @@ It contains:
 * Feature extraction
 * Model training using XGBoost
 * Performance metrics (accuracy, confusion matrix, etc.)
+  
+The notebook also includes:
+
+* 📊 A confusion matrix plot to analyze classification results
+* 📉 Metrics such as accuracy, precision, recall, and F1-score
+* 📌 Step-by-step code for reproducibility and understanding of the training process
+---
+🔍 To view the training code and see how the model was built and evaluated, please check the .ipynb file directly.
 
 ---
 
