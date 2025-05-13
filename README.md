@@ -75,7 +75,7 @@ The project is **deployed to Hugging Face Spaces**, allowing anyone to try it ou
   <img src="static/preview.gif" width="500px" alt="3D Visualization Preview" />
 </p>
 
-> 🔗 Try the online demo on [Hugging Face Spaces](https://huggingface.co/spaces/Marwenbellili72/Prosthetic_hand) *(if public)*
+> 🔗 Try the online demo on [Hugging Face Spaces](https://huggingface.co/spaces/Marwen72/Marwen) *(if public)*
 
 ---
 
